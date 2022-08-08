@@ -7,49 +7,50 @@
 [#]: publisher: " "
 [#]: url: " "
 
-How To Automatically Update Running Docker Containers Using Watchtower
+如何使用 Watchtower 自动更新正在运行的 Docker 容器
 ======
-Automating Docker container base image updates using Watchtower
+使用 Watchtower 自动更新 Docker 容器基础镜像
 
-Keeping the Docker containers up-to-date is one of the important job of a DevOps engineer. Manually updating Docker containers is a quite time consuming task. This guide explains what is **Watchtower**, how to install Watchtower, and how to **automatically update running Docker containers using Watchtower** in Linux.
+对开发运维人员来说，保持 Docker 容器为最新版本是重要工作之一。手动更新 Docker 容器是一项耗时的工作。这篇文章解释了 **Watchtower** 是什么，如何安装它，以及在 Linux 中如何 **使用 Watchtower 自动更新正在运行的 Docker 容器** 。
 
-### What Is Watchtower?
+### Watchtower 是什么？
 
-**Watchtower** is a free, open source application that allows you to monitor the running Docker containers and updates them automatically when it finds any changes in their base images.
+**Watchtower** 是一款免费、开源的应用，用来监控运行中的 Docker 容器，并且当它发现基础镜像被更改后，可以自动的更新容器。
 
-When watchtower finds if a running container needs to be updated, it will gracefully stop the running container by sending it a SIGTERM signal.
+若 watchtower 发现一个运行中的容器需要更新，它会以发送 SIGTERM 信号的方式，优雅的结束运行中容器的运行。
 
-It will then download the new image, and finally restart the Container with the same options that were used when it was deployed initially. Everything will be done automatically on the background, so the user intervention is not required. I
+它会下载新镜像，然后以最初部署时使用的方式，重启容器。所有文件会在后台自动下载，因此不需要用户的介入。
 
-n this guide, we will see how to automatically update running Docker containers using Watchtower in Unix-like operating systems.
+在这份指南中，我们将会明白如何在类 Unix 系统中使用 Watchtower 自动更新正在运行的 Docker 容器。
 
-I tested this guide in CentOS and Ubuntu system, however the procedure is same for all Linux distributions.
+我已经在 CentOS 和 Ubuntu 中测试了这份指南，所有的 Linux 发行版中操作过程都一样。
 
-### Install Watchtower In Linux
+### 在 Linux 中安装 Watchtower
 
-Watchtower itself is available as a Docker image. So, deploying it is not a big deal. Install Docker on your Linux box, and start running Watchtower to monitor the Docker containers in no time.
+可以通过 Docker 镜像的方式下载 Watchtower 。因此，部署它小事一桩。在你的 Linux 中安装 Docker 镜像，然后运行 Watchtower 立即开始监控 Docker 容器。
 
-Refer the following guides to install Docker on RPM-based and DEB-based systems.
+参考下方指导在基于 PRM 和 DEB 包管理系统中安装 Docker
 
-* [How To Install Docker In CentOS][1]
-* [How To Install Docker In Ubuntu][2]
-* [A Beginners Manual To Docker Desktop For Linux][3]
+* [如何在 CentOS 中安装 Docker][1]
+* [如何在 Ubuntu 中安装 Docker][2]
+* [适用于 Linux 的 Docker 桌面初学者手册][3]
 
-Once Docker installed, you can deploy the Watchtower container using the following command as **root** user:
+
+安装 Docker 后，你可以使用以下命令以 **root** 用户身份部署 Watchtower 容器：
 
 ```
 # docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower
 ```
 
-If you have installed Docker Desktop, run the Watchtower container as normal user.
+如果你已经安装了 Docker 桌面版，以普通用户运行 Watchtower 容器。
 
 ```
 $ docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower
 ```
 
-This command will pull the latest image of watchtower, and start watchtower container.
+该命令会拉取最新版的 watchtower 镜像，并运行 watchtower 容器。
 
-**Sample output:**
+**输出样例：**
 
 ```
 Unable to find image 'containrrr/watchtower:latest' locally
@@ -64,15 +65,15 @@ Status: Downloaded newer image for containrrr/watchtower:latest
 
 ![Run Watchtower Docker Container][4]
 
-### Automatically Update Running Docker Containers Using Watchtower
+### 使用 Watchtower 自动更新 Docker 容器
 
-Watchtower has now started with other running containers on your system. You can view the list of running Docker containers using command:
+你系统上，Watchtower 正在和其他容器一起运行。你可以使用一下命令查看运行中的 Docker 容器列表：
 
 ```
 $ docker ps
 ```
 
-**Sample output:**
+**输出样例：**
 
 ```
 CONTAINER ID   IMAGE                       COMMAND                  CREATED          STATUS          PORTS                                         NAMES
@@ -80,23 +81,23 @@ CONTAINER ID   IMAGE                       COMMAND                  CREATED     
 f90b462b0712   bitnami/wordpress-nginx:6   "/opt/bitnami/script…"   19 minutes ago   Up 19 minutes   0.0.0.0:80->8080/tcp, 0.0.0.0:443->8443/tcp   ostechnix-wordpress-1
 ```
 
-As you see in the above output, Watchtower container is running along with another container named **"ostechnix-wordpress-1"**. From now on, Watchtower will start watching this container every few minutes.
+正如上方输出所示，watchtower 容器正在和名为 **"ostechnix-wordpress-1"** 的容器一起运行。从现在开始，watchtower 会每隔几分钟会检查该容器。
 
-If it finds any changes in the this container's base image, it will gracefully shutdown the "ostechnix-wordpress-1" container, and restart it with new image with same options that were used when it was started initially.
+如果 watchtower 发现该容器的基础镜像的任何变化，它会优雅的关闭 "ostechnix-wordpress-1" 容器，然后使用与最初启动它时使用的相同方式，启动新的镜像。
 
-Similarly, it will automatically check for updates for all running containers every few minutes, and updates them automatically.
+类似的，它会自动地每隔几分钟检查所有的运行中容器，并自动更新它们。
 
-### How Does Watchtower Update Multiple-linked Containers?
+### Watchtower 如何更新多连接的容器？
 
-Watchtower is smart enough when it comes to monitoring multiple linked containers.
+在监视多连接容器时，Watchtower 十分智能。
 
-Let us say we are running two containers now.
+假设我们现在运行两个容器。
 
 ```
 $ docker ps
 ```
 
-**Sample output:**
+**输出样例：**
 
 ```
 CONTAINER ID   IMAGE                       COMMAND                  CREATED          STATUS          PORTS                                         NAMES
@@ -107,31 +108,31 @@ a895f082438a   bitnami/mariadb:10.6        "/opt/bitnami/script…"   20 minutes
 
 ![View Running Docker Containers][5]
 
-As you see in the above output, we are running two containers i.e. "ostechnix-wordpress-1" and "ostechnix-mariadb-1". The mariadb container is linked to wordpress container.
+正如你看到的，我们正在运行 "ostechnix-wordpress-1" 和 "ostechnix-mariadb-1" 这两个容器。Mariadb 容器链接到 wordpress 容器。
 
-If Watchtower finds an update for "wordpress" container, it will first shutdown the linked container i.e "mariadb", and then stop the wordpress container.
+如果 Watchtower 发现 "wordpress" 容器有个新版本，它会先关闭与之相连接的 "mariadb" 容器 ，然后才会关闭 "wordpress" 容器。
 
-After updating the wordpress container, Watchtower will restart both containers in correct order with the same options that were used when they were deployed initially, so that the application comes back up correctly. In our case, the mariadb container will be started first, followed by wordpress container to ensure that the link continued to work.
+更新 wordpress 容器后，Watchtower 会以正确的顺序，且与最初启动它们时使用的相同方式，重启这两个容器，以便应用程序正确恢复。在我们的例子中，首先启动的是 mariadb 容器，然后是 wordpress 容器，以确保连接能够继续运行。
 
-### Monitor A Specific Container
+### 监控特定容器
 
-By default, Watchtower will monitor all Docker containers running within the Docker daemon to which it is pointed.
+默认情况下，Watchtower 将监控在它所指向的 Docker 守护进程中运行的所有 Docker 容器。
 
-However, you can limit watchtower to monitor a particular Docker container by specifying the container's name as shown below.
+不过，你可以像下面这样，通过指定容器名称限制 watchtower 监视特定的 Docker 容器。
 
 ```
 $ docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower ostechnix-wordpress-1
 ```
 
-In the above example, watchtower will only monitor the container named "ostechnix-wordpress-1" for updates, and other running containers will be ignored.
+在上方的例子中，watchtower 会忽略其他容器，只监视名为 "ostechnix-wordpress-1" 的容器更新情况。
 
-If you don't specify any arguments, then watchtower will monitor all running Docker Containers as usual.
+如果你不指定任何参数，watchtower 会照常监视所有运行中的 Docker 容器。
 
-### Sending Notifications
+### 发送提示 Sending Notifications
 
-You may want to receive a notification whenever the containers are updated. You can send notifications via Email, Slack, MSTeams, and Gotify etc.
+或许你想收到容器更新的通知。你可以通过电子邮件、Slack 、MSTeams 以及 Gotify 发送通知。
 
-The following example shows how to send notification via Email. I assume you already have setup SMTP server.
+下面这个例子展示了如何通过电子邮件发送通知。假设你已经设置了 SMTP 服务器。
 
 ```
 docker run -d \
@@ -148,14 +149,14 @@ docker run -d \
   containrrr/watchtower
 ```
 
-For more details, refer the Watchtower GitHub repository and Watchtower official website links provided below.
+参考下方 Watchtower Github 仓库和 Watchtower 官方主页获取更多信息：
 
-**Resources:**
+**资料**
 
 * [Watchtower GitHub][6]
-* [Watchtower Website][7]
+* [Watchtower 主页][7]
 
-> **Recommended Download** - [Free eBook: "Docker Containerization Cookbook"][8]
+> **推荐下载** — [免费电子书： "Docker Containerization Cookbook"][8]
 
 --------------------------------------------------------------------------------
 
